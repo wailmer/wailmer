@@ -2,7 +2,6 @@ name: toto
 version: v1
 config:
   Image: guilhem/dh-venv
-  Memory: 40
 
 jobs:
   - name: toto

@@ -32,10 +32,6 @@ func (c *config) Parse(data []byte) error {
 }
 
 func main() {
-	//	var help bool
-
-	//	var helpText = /*help text omitted for readability, shown in output instead.*/
-
 	flag.Parse()
 	var client *docker.Client
 	if *flagEndpoint != "" {
@@ -63,4 +59,14 @@ func main() {
 		}
 	}
 	fmt.Printf("%+v\n", config)
+	for _, job := range flag.Args() {
+		log.Print(job)
+		opts := docker.CreateContainerOptions{Name: config.Jobs[0].Name, Config: &config.Jobs[0].Config}
+		container, err := client.CreateContainer(opts)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Print(container)
+	}
+
 }
