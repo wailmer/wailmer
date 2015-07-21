@@ -77,6 +77,7 @@ func main() {
 		}
 		opts := docker.CreateContainerOptions{Name: j.Name, Config: &j.Config}
 		container, err := client.CreateContainer(opts)
+		//if err := client.StartContainer(
 		if err != nil {
 			log.Fatal(err)
 		}
