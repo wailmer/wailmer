@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -23,12 +24,21 @@ type job struct {
 type config struct {
 	Name    string        `json:"name",yaml:"name"`
 	Config  docker.Config `json:"config",yaml:"config"`
-	Version string        `json:"Version",yaml:"Version"`
+	Version string        `json:"version",yaml:"version"`
 	Jobs    []job         `json:"jobs",yaml:"jobs"`
 }
 
 func (c *config) Parse(data []byte) error {
 	return yaml.Unmarshal(data, c)
+}
+
+func findJob(name string, config config) (job, error) {
+	for _, job := range config.Jobs {
+		if job.Name == name {
+			return job, nil
+		}
+	}
+	return job{}, errors.New("No job found")
 }
 
 func main() {
@@ -61,7 +71,11 @@ func main() {
 	fmt.Printf("%+v\n", config)
 	for _, job := range flag.Args() {
 		log.Print(job)
-		opts := docker.CreateContainerOptions{Name: config.Jobs[0].Name, Config: &config.Jobs[0].Config}
+		j, err := findJob(job, config)
+		if err != nil {
+			log.Fatal(err)
+		}
+		opts := docker.CreateContainerOptions{Name: j.Name, Config: &j.Config}
 		container, err := client.CreateContainer(opts)
 		if err != nil {
 			log.Fatal(err)
